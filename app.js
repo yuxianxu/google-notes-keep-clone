@@ -58,7 +58,7 @@ class App {
     const newNote = {
       title: note.title,
       text: note.text,
-      color: 'salmon',
+      color: '#fbbc04',
       id: this.notes.length > 0 ? this.notes[this.notes.length - 1].id + 1 : 1,
     };
     this.notes = [...this.notes, newNote];
