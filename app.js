@@ -31,7 +31,9 @@ class App {
   }
 
   closeForm() {
-      
+    this.$form.classList.remove('form-open')
+    this.$noteTitle.style.display = 'none'
+    this.$formButtons.style.display = 'none'
   }
 
 
