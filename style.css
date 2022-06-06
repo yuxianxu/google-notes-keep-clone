@@ -262,6 +262,7 @@
     align-items: center;
     color: rgba(0, 0, 0, 0.54);
     display: flex;
+    justify-content: space-around;
     font-size: 12px;
     line-height: 26px;
     margin: 4px 0;
@@ -281,8 +282,12 @@
     width: 20px;
     margin: 0 3px;
     cursor: pointer;
-    color: #202124;
-    opacity: 0.71;
+    color: #2e2f30;
+    opacity: 0.81;
+  }
+
+  .toolbar-color:hover {
+    color: #125aa3;
   }
   
   .toolbar-color-modal {
