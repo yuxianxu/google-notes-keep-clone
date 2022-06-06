@@ -286,8 +286,8 @@
     opacity: 0.81;
   }
 
-  .toolbar-color:hover {
-    color: #125aa3;
+  .toolbar-color {
+    color: #2e2f30;
   }
   
   .toolbar-color-modal {

@@ -1,6 +1,9 @@
 class App {
   constructor() {
-    this.notes = [];
+    this.notes = JSON.parse(localStorage.getItem('notes')) || [];
+    this.title = '';
+    this.text = '';
+    this.id = '';
 
     this.$form = document.querySelector('#form');
     this.$noteTitle = document.querySelector('#note-title');
@@ -14,6 +17,8 @@ class App {
     this.$modalText = document.querySelector('.modal-text');
     this.$modalCloseButton = document.querySelector('.modal-close-button');
     this.$colorTooltip = document.querySelector('#color-tooltip');
+
+    this.render();
     this.addEventListeners();
   }
 
@@ -22,6 +27,7 @@ class App {
       this.handleFormClick(event);
       this.selectedNote(event);
       this.openModal(event);
+      this.deleteNote(event);
     });
 
     document.body.addEventListener('mouseover', (event) => {
@@ -44,7 +50,7 @@ class App {
       const color = event.target.dataset.color;
       if (color) {
         this.editNoteColor(color);
-        console.log(color)
+        console.log(color);
       }
     });
 
@@ -101,6 +107,8 @@ class App {
   }
 
   openModal(event) {
+    if (event.target.matches('.toolbar-delete')) return;
+
     if (event.target.closest('.note')) {
       this.$modal.classList.toggle('open-modal');
       this.$modalTitle.value = this.title;
@@ -118,7 +126,7 @@ class App {
     this.id = event.target.dataset.id;
     const noteCoords = event.target.getBoundingClientRect();
     const horizontal = noteCoords.left + window.scrollX;
-    const vertical =  window.scrollY - 20;
+    const vertical = window.scrollY - 20;
     this.$colorTooltip.style.transform = `translate(${horizontal}px, ${vertical}px)`;
     this.$colorTooltip.style.display = 'flex';
   }
@@ -136,7 +144,7 @@ class App {
       id: this.notes.length > 0 ? this.notes[this.notes.length - 1].id + 1 : 1,
     };
     this.notes = [...this.notes, newNote];
-    this.displayNotes();
+    this.render();
     this.closeForm();
   }
 
@@ -146,14 +154,14 @@ class App {
     this.notes = this.notes.map((note) =>
       note.id === Number(this.id) ? { ...note, title, text } : note
     );
-    this.displayNotes();
+    this.render();
   }
 
   editNoteColor(color) {
     this.notes = this.notes.map((note) =>
       note.id === Number(this.id) ? { ...note, color } : note
     );
-    this.displayNotes();
+    this.render();
   }
 
   selectedNote(event) {
@@ -163,6 +171,23 @@ class App {
     this.title = $noteTitle.innerText;
     this.text = $noteText.innerText;
     this.id = $selectedNote.dataset.id;
+  }
+
+  deleteNote(event) {
+    event.stopPropagation();
+    if (!event.target.matches('.toolbar-delete')) return;
+    const id = event.target.dataset.id;
+    this.notes = this.notes.filter((note) => note.id !== Number(id));
+    this.render();
+  }
+
+  render() {
+    this.saveNotes();
+    this.displayNotes();
+  }
+
+  saveNotes() {
+    localStorage.setItem('notes', JSON.stringify(this.notes));
   }
 
   displayNotes() {
@@ -179,12 +204,9 @@ class App {
             <div class='note-text'>${note.text}</div>
             <div class='toolbar-container'>
                 <div class='toolbar'>
-                    <svg class="toolbar-color"  data-id=${note.id} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#ffffff">
-                    <path d="M12 22C6.49 22 2 17.51 2 12S6.49 2 12 2s10 4.04 10 9c0 3.31-2.69 6-6 6h-1.77c-.28 0-.5.22-.5.5 0 .12.05.23.13.33.41.47.64 1.06.64 1.67A2.5 2.5 0 0 1 12 22zm0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8c.28 0 .5-.22.5-.5a.54.54 0 0 0-.14-.35c-.41-.46-.63-1.05-.63-1.65a2.5 2.5 0 0 1 2.5-2.5H16c2.21 0 4-1.79 4-4 0-3.86-3.59-7-8-7z"/><circle cx="6.5" cy="11.5" r="1.5"/>
-                    <circle cx="9.5" cy="7.5" r="1.5"/><circle cx="14.5" cy="7.5" r="1.5"/><circle cx="17.5" cy="11.5" r="1.5"/>
-                    </svg>
-
-                    <svg class='toolbar-delete' data-testid="geist-icon" fill="none" height="24"
+                    <svg class='toolbar-delete' data-id=${
+                      note.id
+                    } data-testid="geist-icon" fill="none" height="24"
                         shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
                         stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"
                         style="color:var(--geist-foreground)">
@@ -193,6 +215,13 @@ class App {
                         <path d="M10 11v6" />
                         <path d="M14 11v6" />
                     </svg>
+                    <svg class="toolbar-color" data-id=${
+                      note.id
+                    } xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#ffffff">
+                    <path d="M12 22C6.49 22 2 17.51 2 12S6.49 2 12 2s10 4.04 10 9c0 3.31-2.69 6-6 6h-1.77c-.28 0-.5.22-.5.5 0 .12.05.23.13.33.41.47.64 1.06.64 1.67A2.5 2.5 0 0 1 12 22zm0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8c.28 0 .5-.22.5-.5a.54.54 0 0 0-.14-.35c-.41-.46-.63-1.05-.63-1.65a2.5 2.5 0 0 1 2.5-2.5H16c2.21 0 4-1.79 4-4 0-3.86-3.59-7-8-7z"/><circle cx="6.5" cy="11.5" r="1.5"/>
+                    <circle cx="9.5" cy="7.5" r="1.5"/><circle cx="14.5" cy="7.5" r="1.5"/><circle cx="17.5" cy="11.5" r="1.5"/>
+                    </svg>
+
 
                 </div>
             </div>
@@ -200,7 +229,6 @@ class App {
     `
       )
       .join('');
-
   }
 }
 
